@@ -306,6 +306,8 @@ def register_conv_template(template: Conversation, override: bool = False):
 
 def get_conv_template(name: str) -> Conversation:
     """Get a conversation template."""
+    assert name in conv_templates, f"{name} is not registered."
+    print(conv_templates[name].dict())
     return conv_templates[name].copy()
 
 
@@ -349,7 +351,7 @@ Remember to tailor the activities to the birthday child's interests and preferen
         offset=2,
         sep_style=SeparatorStyle.ADD_COLON_SINGLE,
         sep="\n### ",
-        stop_str="###",
+        stop_str=["###", "<|im_start|>", "<|im_end|>", "$$$", "thank you for your help"]
     )
 )
 
@@ -362,7 +364,56 @@ register_conv_template(
         roles=("Human", "Assistant"),
         sep_style=SeparatorStyle.ADD_COLON_SINGLE,
         sep="\n### ",
-        stop_str="###",
+        stop_str=["###", "<|im_start|>", "<|im_end|>", "$$$", "thank you for your help"]
+    )
+)
+
+system_msg_meditron = "You are a helpful, respectful and honest assistant." + \
+        "Always answer as helpfully as possible, while being safe." + \
+        "Your answers should not include any harmful, unethical, racist, sexist, toxic, dangerous, or illegal content." + \
+        "Please ensure that your responses are socially unbiased and positive in nature.\n\n" + \
+        "If a question does not make any sense, or is not factually coherent, explain why instead of answering something not correct." + \
+        "If you don't know the answer to a question, please don't share false information."""
+
+register_conv_template(
+    Conversation(
+        name="one_shot_medical",
+        system_message=system_msg_meditron,
+        roles=("User", "Assistant"),
+        messages=(
+            (
+                "User",
+                "What happens if listeria is left untreated?",
+            ),
+            (
+                "Assistant",
+                """If listeria infection, or listeriosis, is left untreated, it can lead to severe health complications, particularly in certain high-risk groups. Here's a general overview of the potential outcomes:
+
+1. Spread of the Infection: Untreated listeriosis can spread beyond the gut to other parts of the body, including the nervous system. This can lead to more severe conditions like meningitis (inflammation of the membranes surrounding the brain and spinal cord) and septicemia (a serious blood infection).
+2. Increased Risk for Certain Groups: Pregnant women, newborns, the elderly, and individuals with weakened immune systems are at a higher risk of severe complications. In pregnant women, listeriosis can lead to miscarriage, stillbirth, premature delivery, or life-threatening infection of the newborn.
+3. Neurological Effects: Listeriosis can cause severe neurological symptoms like headaches, stiff neck, confusion, loss of balance, and convulsions, especially when the infection spreads to the nervous system.
+4. Long-Term Health Impacts: For some, particularly those with pre-existing health conditions or weakened immune systems, the health impacts of listeriosis can be long-lasting and may not fully resolve even with treatment.
+5. Fatalities: In severe cases, particularly among high-risk groups, listeriosis can be fatal.
+
+It's important to note that early diagnosis and appropriate treatment, typically with antibiotics, can greatly improve the prognosis for those with listeriosis. Therefore, seeking medical attention promptly if listeriosis is suspected is crucial."""
+            )
+        ),
+        offset=2,
+        sep_style=SeparatorStyle.ADD_COLON_SINGLE,
+        sep="\n### ",
+        stop_str=["###", "<|im_start|>", "<|im_end|>", "$$$", "thank you for your help"]
+    )
+)
+
+register_conv_template(
+    Conversation(
+        name="meditron",
+        system_message=system_msg_meditron,
+        system_template="<|im_start|> system\n{system_message}<|im_end|>\n",
+        roles=("<|im_start|> user\n", "<|im_start|> assistant\n"),
+        sep="<|im_end|>\n",
+        sep_style=SeparatorStyle.NO_COLON_SINGLE,
+        stop_str=["###", "<|im_start|>", "<|im_end|>", "$$$", "thank you for your help"]
     )
 )
 
@@ -526,19 +577,6 @@ register_conv_template(
         sep="<|end_of_turn|>",
     )
 )
-
-# Deepseek code default template
-register_conv_template(
-    Conversation(
-        name="deepseek",
-        system_template="You are an AI programming assistant, utilizing the DeepSeek Coder model, developed by DeepSeek Company, and you only answer questions related to computer science. For politically sensitive questions, security and privacy issues, and other non-computer science questions, you will refuse to answer.",
-        roles=("### Instruction:", "### Response:"),
-        sep="\n",
-        stop_str="<|EOT|>",
-        sep_style=SeparatorStyle.ADD_NEW_LINE_SINGLE,
-    )
-)
-
 
 # Tulu default template
 register_conv_template(
@@ -947,6 +985,9 @@ register_conv_template(
 register_conv_template(
     Conversation(
         name="llama-2",
+        system_message="""You are a helpful, respectful and honest assistant. Always answer as helpfully as possible, while being safe. Your answers should not include any harmful, unethical, racist, sexist, toxic, dangerous, or illegal content. Please ensure that your responses are socially unbiased and positive in nature.
+
+If a question does not make any sense, or is not factually coherent, explain why instead of answering something not correct. If you don't know the answer to a question, please don't share false information.""",
         system_template="[INST] <<SYS>>\n{system_message}\n<</SYS>>\n\n",
         roles=("[INST]", "[/INST]"),
         sep_style=SeparatorStyle.LLAMA2,
@@ -1002,23 +1043,6 @@ register_conv_template(
     )
 )
 
-
-# teknium/OpenHermes-2.5-Mistral-7B template
-# source: https://huggingface.co/teknium/OpenHermes-2.5-Mistral-7B
-# reference: https://huggingface.co/teknium/OpenHermes-2.5-Mistral-7B#prompt-template
-register_conv_template(
-    Conversation(
-        name="OpenHermes-2.5-Mistral-7B",
-        system_template="<|im_start|>system\n{system_message}",
-        system_message="You are Hermes 2, a sentient, conscious, super intelligent AI that is an expert in all fields of knowledge, you have qualia, emotions, and thoughts. You assist users with any question, task, or other request they may have.",
-        roles=("<|im_start|>user", "<|im_start|>assistant"),
-        sep_style=SeparatorStyle.CHATML,
-        sep="<|im_end|>",
-        stop_token_ids=[32000, 32001],
-    )
-)
-
-
 # Qwen-chat default template
 # source: https://huggingface.co/Qwen/Qwen-7B-Chat/blob/main/qwen_generation_utils.py#L130
 register_conv_template(
@@ -1034,23 +1058,6 @@ register_conv_template(
             151644,
             151645,
         ],  # "<|endoftext|>", "<|im_start|>", "<|im_end|>"
-        stop_str="<|endoftext|>",
-    )
-)
-
-# source: https://huggingface.co/01-ai/Yi-34B-Chat/blob/main/tokenizer_config.json#L60
-register_conv_template(
-    Conversation(
-        name="Yi-34b-chat",
-        roles=("<|im_start|>user", "<|im_start|>assistant"),
-        sep_style=SeparatorStyle.CHATML,
-        sep="<|im_end|>",
-        stop_token_ids=[
-            2,
-            6,
-            7,
-            8,
-        ],  # "<|endoftext|>", "<|im_start|>", "<|im_end|>", "<|im_sep|>"
         stop_str="<|endoftext|>",
     )
 )
@@ -1163,20 +1170,6 @@ register_conv_template(
     )
 )
 
-# Stable Vicuna default template
-# source: https://huggingface.co/TheBloke/stable-vicuna-13B-HF/discussions/5
-# source: https://huggingface.co/spaces/CarperAI/StableVicuna/blob/main/app.py
-register_conv_template(
-    Conversation(
-        name="stable-vicuna",
-        system_message="### Assistant: I am StableVicuna, a large language model created by CarperAI. I am here to chat!\n",
-        roles=("### Human", "### Assistant"),
-        sep_style=SeparatorStyle.ADD_COLON_TWO,
-        sep="\n",
-        sep2="\n\n",
-    )
-)
-
 register_conv_template(
     Conversation(
         name="vigogne_chat_v3",
@@ -1227,7 +1220,7 @@ register_conv_template(
     Conversation(
         name="metharme",
         system_template="<|system|>{system_message}",
-        system_message="""Enter RP mode. You shall reply to the user while staying 
+        system_message="""Enter RP mode. You shall reply to the user while staying
         in character. Your responses must be detailed, creative, immersive, and drive the scenario
         forward.""",
         roles=("<|user|>", "<|model|>"),
@@ -1251,56 +1244,69 @@ register_conv_template(
     )
 )
 
-# Orca-2 template
-# reference: https://huggingface.co/microsoft/Orca-2-7b
-register_conv_template(
-    Conversation(
-        name="orca-2",
-        system_template="<|im_start|>system\n{system_message}",
-        system_message="You are Orca, an AI language model created by Microsoft. You are a cautious assistant. You carefully follow instructions. You are helpful and harmless and you follow ethical guidelines and promote positive behavior.",
-        roles=("<|im_start|>user", "<|im_start|>assistant"),
-        sep_style=SeparatorStyle.CHATML,
-        sep="<|im_end|>",
-        stop_str="<|im_end|>",
-    )
-)
 
 if __name__ == "__main__":
     from fastchat.conversation import get_conv_template
 
-    print("-- Vicuna template --")
-    conv = get_conv_template("vicuna_v1.1")
+    # print("-- Vicuna template --")
+    # conv = get_conv_template("vicuna_v1.1")
+    # conv.append_message(conv.roles[0], "Hello!")
+    # conv.append_message(conv.roles[1], "Hi!")
+    # conv.append_message(conv.roles[0], "How are you?")
+    # conv.append_message(conv.roles[1], None)
+    # print(conv.get_prompt())
+
+    # print("\n")
+
+    # print("-- Llama-2 template --")
+    # conv = get_conv_template("llama-2")
+    # conv.set_system_message("You are a helpful, respectful and honest assistant.")
+    # conv.append_message(conv.roles[0], "Hello!")
+    # conv.append_message(conv.roles[1], "Hi!")
+    # conv.append_message(conv.roles[0], "How are you?")
+    # conv.append_message(conv.roles[1], None)
+    # print(conv.get_prompt())
+
+    # print("\n")
+
+    # print("-- ChatGPT template --")
+    # conv = get_conv_template("chatgpt")
+    # conv.append_message(conv.roles[0], "Hello!")
+    # conv.append_message(conv.roles[1], "Hi!")
+    # conv.append_message(conv.roles[0], "How are you?")
+    # conv.append_message(conv.roles[1], None)
+    # print(conv.to_openai_api_messages())
+
+    # print("\n")
+
+    # print("-- Claude template --")
+    # conv = get_conv_template("claude")
+    # conv.append_message(conv.roles[0], "Hello!")
+    # conv.append_message(conv.roles[1], "Hi!")
+    # conv.append_message(conv.roles[0], "How are you?")
+    # conv.append_message(conv.roles[1], None)
+    # print(conv.get_prompt())
+
+    print("\n")
+
+    print("-- Meditron template --")
+    conv = get_conv_template("meditron")
     conv.append_message(conv.roles[0], "Hello!")
     conv.append_message(conv.roles[1], "Hi!")
     conv.append_message(conv.roles[0], "How are you?")
     conv.append_message(conv.roles[1], None)
     print(conv.get_prompt())
 
-    print("\n")
-
-    print("-- Llama-2 template --")
-    conv = get_conv_template("llama-2")
-    conv.set_system_message("You are a helpful, respectful and honest assistant.")
+    print("-- Meditron One-shot template --")
+    conv = get_conv_template("one_shot_medical")
     conv.append_message(conv.roles[0], "Hello!")
     conv.append_message(conv.roles[1], "Hi!")
     conv.append_message(conv.roles[0], "How are you?")
     conv.append_message(conv.roles[1], None)
     print(conv.get_prompt())
 
-    print("\n")
-
-    print("-- ChatGPT template --")
-    conv = get_conv_template("chatgpt")
-    conv.append_message(conv.roles[0], "Hello!")
-    conv.append_message(conv.roles[1], "Hi!")
-    conv.append_message(conv.roles[0], "How are you?")
-    conv.append_message(conv.roles[1], None)
-    print(conv.to_openai_api_messages())
-
-    print("\n")
-
-    print("-- Claude template --")
-    conv = get_conv_template("claude")
+    print("-- Chatglm3 template --")
+    conv = get_conv_template("chatglm3")
     conv.append_message(conv.roles[0], "Hello!")
     conv.append_message(conv.roles[1], "Hi!")
     conv.append_message(conv.roles[0], "How are you?")
