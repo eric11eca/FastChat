@@ -401,7 +401,7 @@ It's important to note that early diagnosis and appropriate treatment, typically
         offset=2,
         sep_style=SeparatorStyle.ADD_COLON_SINGLE,
         sep="\n### ",
-        stop_str=["###", "<|im_start|>", "<|im_end|>", "$$$", "thank you for your help"]
+        stop_str=["###", "<|im_start|>", "<|im_end|>", "<\s>", "User:", "Assistant:"]
     )
 )
 
