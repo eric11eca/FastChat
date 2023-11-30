@@ -377,6 +377,17 @@ system_msg_meditron = "You are a helpful, respectful and honest assistant." + \
 
 register_conv_template(
     Conversation(
+        name="zero_shot_medical",
+        system_message=system_msg_meditron,
+        roles=("User", "Assistant"),
+        sep_style=SeparatorStyle.ADD_COLON_SINGLE,
+        sep="\n### ",
+        stop_str=["<\s>", "###", "Assistant:", "User:"]
+    )
+)
+
+register_conv_template(
+    Conversation(
         name="one_shot_medical",
         system_message=system_msg_meditron,
         roles=("User", "Assistant"),
@@ -401,19 +412,7 @@ It's important to note that early diagnosis and appropriate treatment, typically
         offset=2,
         sep_style=SeparatorStyle.ADD_COLON_SINGLE,
         sep="\n### ",
-        stop_str=["###", "<|im_start|>", "<|im_end|>", "<\s>", "User:", "Assistant:"]
-    )
-)
-
-register_conv_template(
-    Conversation(
-        name="meditron",
-        system_message=system_msg_meditron,
-        system_template="<|im_start|> system\n{system_message}<|im_end|>\n",
-        roles=("<|im_start|> user\n", "<|im_start|> assistant\n"),
-        sep="<|im_end|>\n",
-        sep_style=SeparatorStyle.NO_COLON_SINGLE,
-        stop_str=["###", "<|im_start|>", "<|im_end|>", "$$$", "thank you for your help"]
+        stop_str=["<\s>", "###", "Assistant:", "User:"]
     )
 )
 
